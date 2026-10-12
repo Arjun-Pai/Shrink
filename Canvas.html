@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { margin:0; overflow:hidden; font-family:sans-serif; background:#222; color:#fff; }
+  #bar { position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.8); padding:8px; border-radius:8px; display:flex; gap:8px; }
+  canvas { display:block; cursor:crosshair; background:#fff; }
+  button, input { cursor:pointer; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <input type="color" id="c" value="#000000">
+  <input type="range" id="s" min="1" max="50" value="5">
+  <button onclick="ctx.clearRect(0,0,cv.width,cv.height)">Clear</button>
+</div>
+<canvas id="cv"></canvas>
+<script>
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  function resize(){ cv.width=window.innerWidth; cv.height=window.innerHeight; }
+  window.onresize = resize; resize();
+  let d = false;
+  const pos = e => {
+    const r = cv.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  };
+  const start = e => { d=true; draw(e); };
+  const stop = () => { d=false; ctx.beginPath(); };
+  const draw = e => {
+    if(!d) return;
+    const p = pos(e);
+    ctx.lineWidth = document.getElementById('s').value;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = document.getElementById('c').value;
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  };
+  cv.addEventListener('mousedown', start);
+  cv.addEventListener('mouseup', stop);
+  cv.addEventListener('mousemove', draw);
+  cv.addEventListener('touchstart', start);
+  cv.addEventListener('touchend', stop);
+  cv.addEventListener('touchmove', draw);
+</script>
+</body>
+</html>
