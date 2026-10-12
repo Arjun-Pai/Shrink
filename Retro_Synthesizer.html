@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family:sans-serif; text-align:center; background:#121212; color:#fff; margin-top:50px; }
+  .keys { display:flex; justify-content:center; gap:5px; margin-top:20px; }
+  .key { width:40px; height:140px; background:#fff; color:#000; border-radius:0 0 5px 5px; cursor:pointer; display:flex; align-items:flex-end; justify-content:center; padding-bottom:10px; font-weight:bold; }
+  .key:active { background:#ccc; }
+  select { padding:8px; font-size:16px; border-radius:4px; }
+</style>
+</head>
+<body>
+<h2>Retro Web Synth</h2>
+<label>Waveform: </label>
+<select id="w">
+  <option>sine</option>
+  <option>square</option>
+  <option>sawtooth</option>
+  <option>triangle</option>
+</select>
+<div class="keys" id="kb"></div>
+<script>
+  const actx = new (window.AudioContext || window.webkitAudioContext)();
+  const notes = [
+    {f:261.63,k:'C'},{f:293.66,k:'D'},{f:329.63,k:'E'},
+    {f:349.23,k:'F'},{f:392.00,k:'G'},{f:440.00,k:'A'},{f:493.88,k:'B'}
+  ];
+  const kb = document.getElementById('kb');
+  notes.forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'key';
+    d.innerText = n.k;
+    d.onmousedown = () => play(n.f);
+    kb.appendChild(d);
+  });
+  function play(f) {
+    const osc = actx.createOscillator();
+    const g = actx.createGain();
+    osc.type = document.getElementById('w').value;
+    osc.frequency.value = f;
+    osc.connect(g);
+    g.connect(actx.destination);
+    osc.start();
+    g.gain.exponentialRampToValueAtTime(0.00001, actx.currentTime + 1);
+    osc.stop(actx.currentTime + 1);
+  }
+</script>
+</body>
+</html>
