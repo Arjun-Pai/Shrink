@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin:0; background:#111; color:#fff; font-family:sans-serif; text-align:center; overflow:hidden; }
+  canvas { background:#222; display:block; margin:20px auto; border:2px solid #555; }
+</style>
+</head>
+<body>
+<h3>2D Obby Jumper</h3>
+<p>Press Space or Tap to Jump. Reach the Green Goal!</p>
+<canvas id="gc" width="600" height="300"></canvas>
+<script>
+  const c = document.getElementById('gc'), x = c.getContext('2d');
+  let p = { x:20, y:200, w:20, h:20, vy:0, grounded:false };
+  let goal = { x:550, y:220, w:30, h:30 };
+  let obs = [{x:150,y:260,w:40,h:40},{x:280,y:230,w:40,h:70},{x:420,y:250,w:30,h:50}];
+  function jump() { if(p.grounded) { p.vy = -10; p.grounded = false; } }
+  window.onkeydown = e => { if(e.code==='Space') jump(); };
+  c.onclick = jump;
+  function update() {
+    p.vy += 0.5; p.y += p.vy;
+    if(p.y >= 250) { p.y = 250; p.vy = 0; p.grounded = true; }
+    p.x += 2;
+    if(p.x > 580) p.x = 0;
+    obs.forEach(o => {
+      if(p.x < o.x+o.w && p.x+p.w > o.x && p.y < o.y+o.h && p.y+p.h > o.y) { p.x = 20; p.y = 200; }
+    });
+    if(p.x < goal.x+goal.w && p.x+p.w > goal.x && p.y < goal.y+goal.h && p.y+p.h > goal.y) {
+      alert("You Win!"); p.x = 20;
+    }
+  }
+  function draw() {
+    x.clearRect(0,0,600,300);
+    x.fillStyle = '#0f0'; x.fillRect(goal.x, goal.y, goal.w, goal.h);
+    x.fillStyle = '#f00'; obs.forEach(o => x.fillRect(o.x, o.y, o.w, o.h));
+    x.fillStyle = '#0bf'; x.fillRect(p.x, p.y, p.w, p.h);
+    x.fillStyle = '#fff'; x.fillRect(0,270,600,300);
+  }
+  setInterval(() => { update(); draw(); }, 1000/60);
+</script>
+</body>
+</html>
