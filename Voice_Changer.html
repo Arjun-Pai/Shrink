@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family:sans-serif; text-align:center; background:#1e1e2e; color:#cdd6f4; padding:20px; }
+  button { padding:10px 20px; margin:5px; font-size:16px; border:none; border-radius:5px; cursor:pointer; background:#89b4fa; color:#11111b; }
+  button:disabled { background:#45475a; color:#a6adc8; }
+</style>
+</head>
+<body>
+<h2>Voice Changer</h2>
+<button id="rec">Record (3s)</button>
+<br><br>
+<button id="p1" disabled>Chipmunk</button>
+<button id="p2" disabled>Monster</button>
+<button id="p3" disabled>Slow-Mo</button>
+<script>
+  let buf;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  document.getElementById('rec').onclick = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mr = new MediaRecorder(stream);
+    const chunks = [];
+    mr.ondataavailable = e => chunks.push(e.data);
+    mr.onstop = async () => {
+      const blob = new Blob(chunks);
+      const arr = await blob.arrayBuffer();
+      buf = await ctx.decodeAudioData(arr);
+      ['p1','p2','p3'].forEach(id => document.getElementById(id).disabled = false);
+    };
+    mr.start();
+    setTimeout(() => mr.stop(), 3000);
+  };
+  function play(rate) {
+    if(!buf) return;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate;
+    src.connect(ctx.destination);
+    src.start();
+  }
+  document.getElementById('p1').onclick = () => play(1.8);
+  document.getElementById('p2').onclick = () => play(0.6);
+  document.getElementById('p3').onclick = () => play(0.3);
+</script>
+</body>
+</html>
